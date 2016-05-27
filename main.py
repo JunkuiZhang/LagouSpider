@@ -18,6 +18,7 @@ class LagouSpider:
 		self.city = city
 		# 公司所在行业
 		self.hy = hangye
+		self.cookie = None
 		self.urls = []
 		self.urls.append(self.generate_initial_url())
 		self.urls.append(self.generate_main_url())
@@ -128,11 +129,16 @@ class LagouSpider:
 			_first = False
 		post_data = {
 			"first": _first,
-			"pn": page_num,
+			"pn": str(page_num),
 			"kd": keyword
 		}
-		response = requests.post(self.urls[1], post_data, headers=post_header)
+		if self.cookie:
+			response = requests.post(self.urls[1], post_data, headers=post_header, cookies=self.cookie)
+		else:
+			response = requests.post(self.urls[1], post_data, headers=post_header)
 		page_json = json.loads(response.text)
+		self.cookie = response.cookies
+		print(page_json)
 		return page_json["content"]["positionResult"]["result"]
 
 	def run(self, save_csv=False):
